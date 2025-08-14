@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -257,11 +257,11 @@ export type Database = {
     }
     Functions: {
       claim_referral_reward: {
-        Args: { user_uuid: string; reward_id: string }
+        Args: { reward_id: string; user_uuid: string }
         Returns: Json
       }
       complete_quest: {
-        Args: { user_uuid: string; quest_uuid: string }
+        Args: { quest_uuid: string; user_uuid: string }
         Returns: Json
       }
       handle_daily_checkin: {
@@ -274,10 +274,10 @@ export type Database = {
       }
       log_user_activity: {
         Args: {
-          user_uuid: string
-          activity_type_param: string
           activity_data_param?: Json
+          activity_type_param: string
           points_param?: number
+          user_uuid: string
         }
         Returns: undefined
       }

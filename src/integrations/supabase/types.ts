@@ -264,6 +264,24 @@ export type Database = {
         Args: { quest_uuid: string; user_uuid: string }
         Returns: Json
       }
+      get_public_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          id: string
+          points: number
+          total_referrals: number
+          user_id: string
+          username: string
+        }[]
+      }
+      get_referrer_by_code: {
+        Args: { referral_code_param: string }
+        Returns: {
+          user_id: string
+          username: string
+        }[]
+      }
       handle_daily_checkin: {
         Args: { user_uuid: string }
         Returns: Json

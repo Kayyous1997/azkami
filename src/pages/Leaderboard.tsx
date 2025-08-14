@@ -28,30 +28,32 @@ const Leaderboard = () => {
   const [timeFilter, setTimeFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
 
-  // Fetch leaderboard data
+  // Fetch leaderboard data using secure function
   const { data: leaderboardData = [] } = useQuery({
     queryKey: ['leaderboard', timeFilter, categoryFilter],
     queryFn: async () => {
-      let query = supabase
-        .from('profiles')
-        .select('user_id, username, points, total_referrals, created_at')
-        .order('points', { ascending: false })
-        .limit(100)
-
-      // Apply time filtering if needed
+      const { data, error } = await supabase.rpc('get_public_profiles')
+      
+      if (error) throw error
+      
+      let filteredData = data || []
+      
+      // Apply time filtering if needed (client-side since we can't modify the function params)
       if (timeFilter === 'week') {
         const weekAgo = new Date()
         weekAgo.setDate(weekAgo.getDate() - 7)
-        query = query.gte('created_at', weekAgo.toISOString())
+        filteredData = filteredData.filter(profile => 
+          new Date(profile.created_at) >= weekAgo
+        )
       } else if (timeFilter === 'month') {
         const monthAgo = new Date()
         monthAgo.setMonth(monthAgo.getMonth() - 1)
-        query = query.gte('created_at', monthAgo.toISOString())
+        filteredData = filteredData.filter(profile => 
+          new Date(profile.created_at) >= monthAgo
+        )
       }
-
-      const { data, error } = await query
-      if (error) throw error
-      return data || []
+      
+      return filteredData.slice(0, 100)
     }
   })
 
@@ -91,19 +93,21 @@ const Leaderboard = () => {
     }
   })
 
-  // Fetch referral leaderboard
+  // Fetch referral leaderboard using secure function
   const { data: referralLeaderboard = [] } = useQuery({
     queryKey: ['referral_leaderboard'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, username, total_referrals')
-        .gt('total_referrals', 0)
-        .order('total_referrals', { ascending: false })
-        .limit(50)
-
+      const { data, error } = await supabase.rpc('get_public_profiles')
+      
       if (error) throw error
-      return data || []
+      
+      // Filter for users with referrals and sort
+      const referralData = (data || [])
+        .filter(profile => (profile.total_referrals || 0) > 0)
+        .sort((a, b) => (b.total_referrals || 0) - (a.total_referrals || 0))
+        .slice(0, 50)
+      
+      return referralData
     }
   })
 

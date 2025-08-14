@@ -63,13 +63,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     let referredBy = null
     if (referralCode) {
-      const { data: referrer } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('referral_code', referralCode)
-        .single()
+      const { data: referrer } = await supabase.rpc('get_referrer_by_code', {
+        referral_code_param: referralCode
+      })
       
-      referredBy = referrer?.user_id
+      referredBy = referrer?.[0]?.user_id
     }
 
     const { error } = await supabase.auth.signUp({

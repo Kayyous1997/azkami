@@ -10,6 +10,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Tasks from "./pages/Tasks";
 import Referrals from "./pages/Referrals";
 import Settings from "./pages/Settings";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/referral" element={<Referrals />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

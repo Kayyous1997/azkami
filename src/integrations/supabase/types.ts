@@ -58,6 +58,7 @@ export type Database = {
           points: number | null
           referral_code: string | null
           referred_by: string | null
+          role: string | null
           total_referrals: number | null
           updated_at: string
           user_id: string
@@ -73,6 +74,7 @@ export type Database = {
           points?: number | null
           referral_code?: string | null
           referred_by?: string | null
+          role?: string | null
           total_referrals?: number | null
           updated_at?: string
           user_id: string
@@ -88,6 +90,7 @@ export type Database = {
           points?: number | null
           referral_code?: string | null
           referred_by?: string | null
+          role?: string | null
           total_referrals?: number | null
           updated_at?: string
           user_id?: string
@@ -174,6 +177,45 @@ export type Database = {
           tier_level?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      social_task_submissions: {
+        Row: {
+          id: string
+          notes: string | null
+          platform: string
+          quest_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          submitted_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          platform: string
+          quest_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          platform?: string
+          quest_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string
+          user_id?: string
+          username?: string
         }
         Relationships: []
       }
@@ -298,6 +340,22 @@ export type Database = {
           user_uuid: string
         }
         Returns: undefined
+      }
+      review_social_task: {
+        Args: {
+          notes_param?: string
+          status_param: string
+          submission_uuid: string
+        }
+        Returns: Json
+      }
+      submit_social_task: {
+        Args: {
+          platform_param: string
+          quest_uuid: string
+          username_param: string
+        }
+        Returns: Json
       }
     }
     Enums: {

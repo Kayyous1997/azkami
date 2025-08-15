@@ -9,6 +9,7 @@ import { useAuth } from "@/components/auth/AuthContext"
 import { useUserData } from "@/hooks/useUserData"
 import { useActivityTracking } from "@/hooks/useActivityTracking"
 import { useQuestProgress } from "@/hooks/useQuestProgress"
+import { SocialTaskDialog } from "@/components/SocialTaskDialog"
 
 const activeTasks = [
   { id: 1, title: "Complete Social Media Verification", description: "Verify your Twitter and Discord accounts", xp: 500, progress: 50, deadline: "2 days", category: "Verification" },
@@ -191,25 +192,46 @@ const Tasks = () => {
                           <Zap className="w-4 h-4" />
                           <span className="font-medium">{quest.points_reward} XP</span>
                         </div>
-                        <Button 
-                          size="sm" 
-                          className={isQuestCompleted(quest.id) 
-                            ? "bg-green-500/20 text-green-400 border-green-500/20 hover:bg-green-500/20" 
-                            : "bg-gradient-primary hover:opacity-90"
-                          }
-                          onClick={() => completeQuest(quest.id)}
-                          disabled={!canCompleteQuest(quest) || isQuestCompleted(quest.id)}
-                        >
-                          {isQuestCompleted(quest.id) 
-                            ? <>
-                                <CheckSquare className="w-4 h-4 mr-1" />
-                                Claimed
-                              </>
-                            : canCompleteQuest(quest) 
-                              ? 'Claim Reward' 
-                              : 'Complete Requirements'
-                          }
-                        </Button>
+                        {quest.quest_type === 'social' ? (
+                          <SocialTaskDialog quest={quest}>
+                            <Button 
+                              size="sm" 
+                              className={isQuestCompleted(quest.id) 
+                                ? "bg-green-500/20 text-green-400 border-green-500/20 hover:bg-green-500/20" 
+                                : "bg-gradient-primary hover:opacity-90"
+                              }
+                              disabled={isQuestCompleted(quest.id)}
+                            >
+                              {isQuestCompleted(quest.id) 
+                                ? <>
+                                    <CheckSquare className="w-4 h-4 mr-1" />
+                                    Claimed
+                                  </>
+                                : 'Complete Task'
+                              }
+                            </Button>
+                          </SocialTaskDialog>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            className={isQuestCompleted(quest.id) 
+                              ? "bg-green-500/20 text-green-400 border-green-500/20 hover:bg-green-500/20" 
+                              : "bg-gradient-primary hover:opacity-90"
+                            }
+                            onClick={() => completeQuest(quest.id)}
+                            disabled={!canCompleteQuest(quest) || isQuestCompleted(quest.id)}
+                          >
+                            {isQuestCompleted(quest.id) 
+                              ? <>
+                                  <CheckSquare className="w-4 h-4 mr-1" />
+                                  Claimed
+                                </>
+                              : canCompleteQuest(quest) 
+                                ? 'Claim Reward' 
+                                : 'Complete Requirements'
+                            }
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>

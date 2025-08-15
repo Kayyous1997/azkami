@@ -12,7 +12,8 @@ import {
   Moon,
   Sun,
   Zap,
-  User
+  User,
+  Shield
 } from "lucide-react"
 import {
   Sidebar,
@@ -45,6 +46,10 @@ const navigationItems = [
   { title: "Referral", url: "/referral", icon: UserPlus },
   { title: "Leaderboard", url: "/leaderboard", icon: Crown, comingsoon: true },
   { title: "Settings", url: "/settings", icon: Settings },
+]
+
+const adminNavigationItems = [
+  { title: "Admin", url: "/admin", icon: Shield },
 ]
 
 export function DashboardSidebar() {
@@ -110,6 +115,27 @@ export function DashboardSidebar() {
                         )}
                       </NavLink>
                     )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              
+              {/* Admin Section - Only show for admin users */}
+              {profile?.role === 'admin' && adminNavigationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                        isActive(item.url)
+                          ? "bg-gradient-primary text-white shadow-primary"
+                          : "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground"
+                      }`}
+                    >
+                      <item.icon className={`w-5 h-5 ${isActive(item.url) ? "drop-shadow-sm" : ""}`} />
+                      {!collapsed && (
+                        <span className="font-medium">{item.title}</span>
+                      )}
+                    </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

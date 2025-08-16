@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './components/auth/AuthContext';
 import Index from "./pages/Index";
 import Join from "./pages/Join";
+import ResetPassword from "./pages/ResetPassword";
 import Leaderboard from "./pages/Leaderboard";
 import Tasks from "./pages/Tasks";
 import Referrals from "./pages/Referrals";
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/join" element={<Join />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/referral" element={<Referrals />} />

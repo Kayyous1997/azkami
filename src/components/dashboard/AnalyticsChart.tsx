@@ -81,9 +81,7 @@ export function AnalyticsChart() {
       
       if (checkinsError) throw checkinsError
 
-      const { count: userCount, error: userError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
+      const { data: userCount, error: userError } = await supabase.rpc('get_total_user_count')
       
       if (userError) throw userError
 

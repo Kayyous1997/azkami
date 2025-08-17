@@ -22,12 +22,9 @@ export function ActivityByCountry() {
   const { data: totalUsers } = useQuery({
     queryKey: ['total-users'],
     queryFn: async () => {
-      const { count, error } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-      
+      const { data, error } = await supabase.rpc('get_total_user_count')
       if (error) throw error
-      return count || 0
+      return data || 0
     }
   })
 

@@ -306,6 +306,10 @@ export type Database = {
         Args: { quest_uuid: string; user_uuid: string }
         Returns: Json
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_public_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -323,6 +327,10 @@ export type Database = {
           user_id: string
           username: string
         }[]
+      }
+      get_total_user_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       handle_daily_checkin: {
         Args: { user_uuid: string }

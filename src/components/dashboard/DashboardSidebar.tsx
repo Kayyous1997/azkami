@@ -13,7 +13,8 @@ import {
   Sun,
   Zap,
   User,
-  Shield
+  Shield,
+  Lock
 } from "lucide-react"
 import {
   Sidebar,
@@ -39,7 +40,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Members", url: "/members", icon: Users, comingSoon: true },
+  { title: "Staking", url: "/staking", icon: Lock },
   { title: "Tasks", url: "/tasks", icon: CheckSquare },
   { title: "Rewards", url: "/rewards", icon: Trophy, comingSoon: true },
   { title: "Quests", url: "/quests", icon: Map, comingSoon: true },

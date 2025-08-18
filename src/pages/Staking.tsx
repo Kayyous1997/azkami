@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Coins, Lock, Unlock, Trophy, Zap } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Coins, Lock, Unlock, Trophy, Zap, Calendar, Users } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 
 // Mock NFT data - replace with actual contract calls
 const mockNFTs = [
@@ -40,9 +43,18 @@ const mockNFTs = [
 
 const STAKING_CONTRACT = '0x1234567890123456789012345678901234567890'; // Replace with actual contract
 
+type StakingPeriod = 'daily' | 'weekly' | 'monthly';
+
+const STAKING_PERIODS = {
+  daily: { label: 'Daily', multiplier: 1, lockDays: 1 },
+  weekly: { label: 'Weekly', multiplier: 1.5, lockDays: 7 },
+  monthly: { label: 'Monthly', multiplier: 2.5, lockDays: 30 },
+};
+
 const Staking = () => {
   const { address, isConnected } = useAccount();
   const [selectedNFTs, setSelectedNFTs] = useState<number[]>([]);
+  const [stakingPeriod, setStakingPeriod] = useState<StakingPeriod>('weekly');
   const [totalStaked, setTotalStaked] = useState(0);
   const [pendingRewards, setPendingRewards] = useState(0);
   const [stakingAPY, setStakingAPY] = useState(125); // 125% APY
@@ -64,12 +76,46 @@ const Staking = () => {
     setPendingRewards(totalRewards);
   }, []);
 
+  const handleStakeMultipleNFTs = async () => {
+    if (selectedNFTs.length === 0) {
+      toast({
+        title: "No NFTs Selected",
+        description: "Please select at least one NFT to stake.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const period = STAKING_PERIODS[stakingPeriod];
+      toast({
+        title: "Staking NFTs",
+        description: `Staking ${selectedNFTs.length} NFTs for ${period.label.toLowerCase()} on Monad blockchain...`,
+      });
+      
+      // Simulate transaction delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "NFTs Staked Successfully!",
+        description: `${selectedNFTs.length} NFTs are now earning $AZK rewards with ${period.multiplier}x multiplier.`,
+      });
+      setSelectedNFTs([]);
+    } catch (error) {
+      toast({
+        title: "Staking Failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleStakeNFT = async (nftId: number) => {
     try {
-      // Mock staking transaction
+      const period = STAKING_PERIODS[stakingPeriod];
       toast({
         title: "Staking NFT",
-        description: "Transaction submitted to Monad blockchain...",
+        description: `Transaction submitted to Monad blockchain for ${period.label.toLowerCase()} staking...`,
       });
       
       // Simulate transaction delay
@@ -77,7 +123,7 @@ const Staking = () => {
       
       toast({
         title: "NFT Staked Successfully!",
-        description: "Your NFT is now earning $AZK rewards.",
+        description: `Your NFT is now earning $AZK rewards with ${period.multiplier}x multiplier.`,
       });
     } catch (error) {
       toast({
@@ -142,29 +188,39 @@ const Staking = () => {
     }
   };
 
+  const toggleNFTSelection = (nftId: number) => {
+    setSelectedNFTs(prev => 
+      prev.includes(nftId) 
+        ? prev.filter(id => id !== nftId)
+        : [...prev, nftId]
+    );
+  };
+
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-card">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl bg-gradient-primary bg-clip-text text-transparent">
-              Connect Your Wallet
-            </CardTitle>
-            <p className="text-muted-foreground">
-              Connect your wallet to start staking NFTs and earning $AZK rewards on Monad
-            </p>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <ConnectButton />
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md shadow-card">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl bg-gradient-primary bg-clip-text text-transparent">
+                Connect Your Wallet
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Connect your wallet to start staking NFTs and earning $AZK rewards on Monad
+              </p>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <ConnectButton />
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 space-y-6">
-      <div className="max-w-7xl mx-auto">
+    <DashboardLayout>
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -253,36 +309,89 @@ const Staking = () => {
           </TabsList>
 
           <TabsContent value="my-nfts" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {mockNFTs.filter(nft => !nft.isStaked).map((nft) => (
-                <Card key={nft.id} className="shadow-card overflow-hidden">
-                  <div className="aspect-square bg-gradient-secondary p-4">
-                    <img 
-                      src={nft.image} 
-                      alt={nft.name}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
+            {/* Staking Configuration */}
+            <Card className="shadow-card">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-6 items-start md:items-end">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">Staking Period</label>
+                    <Select value={stakingPeriod} onValueChange={(value: StakingPeriod) => setStakingPeriod(value)}>
+                      <SelectTrigger className="w-full md:w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(STAKING_PERIODS).map(([key, period]) => (
+                          <SelectItem key={key} value={key}>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              <span>{period.label}</span>
+                              <Badge variant="secondary">{period.multiplier}x</Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {STAKING_PERIODS[stakingPeriod].multiplier}x reward multiplier, {STAKING_PERIODS[stakingPeriod].lockDays} day lock period
+                    </p>
                   </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold truncate">{nft.name}</h3>
-                    <div className="flex items-center justify-between mt-2">
-                      <Badge className={getRarityColor(nft.rarity)}>
-                        {nft.rarity}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {nft.stakingPower} Power
-                      </span>
+                  
+                  {selectedNFTs.length > 0 && (
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          {selectedNFTs.length} Selected
+                        </div>
+                      </div>
+                      <Button onClick={handleStakeMultipleNFTs} className="glow-hover">
+                        <Lock className="mr-2 h-4 w-4" />
+                        Stake Selected ({selectedNFTs.length})
+                      </Button>
                     </div>
-                    <Button 
-                      className="w-full mt-4"
-                      onClick={() => handleStakeNFT(nft.id)}
-                    >
-                      <Lock className="mr-2 h-4 w-4" />
-                      Stake NFT
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {mockNFTs.filter(nft => !nft.isStaked).map((nft) => {
+                const isSelected = selectedNFTs.includes(nft.id);
+                return (
+                  <Card key={nft.id} className={`shadow-card overflow-hidden cursor-pointer transition-all ${isSelected ? 'ring-2 ring-primary' : ''}`}>
+                    <div className="aspect-square bg-gradient-secondary p-4 relative" onClick={() => toggleNFTSelection(nft.id)}>
+                      <img 
+                        src={nft.image} 
+                        alt={nft.name}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                      <Checkbox 
+                        checked={isSelected}
+                        className="absolute top-2 left-2 bg-background"
+                        onChange={() => toggleNFTSelection(nft.id)}
+                      />
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold truncate">{nft.name}</h3>
+                      <div className="flex items-center justify-between mt-2">
+                        <Badge className={getRarityColor(nft.rarity)}>
+                          {nft.rarity}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {nft.stakingPower} Power
+                        </span>
+                      </div>
+                      <Button 
+                        className="w-full mt-4"
+                        onClick={() => handleStakeNFT(nft.id)}
+                      >
+                        <Lock className="mr-2 h-4 w-4" />
+                        Stake NFT
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
@@ -342,7 +451,7 @@ const Staking = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

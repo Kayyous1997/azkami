@@ -3,8 +3,8 @@ import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 
 // Define Monad chain configuration
 const monadChain = {
-  id: 41500,
-  name: 'Monad',
+  id: 10143,
+  name: 'Monad Testnet',
   nativeCurrency: {
     decimals: 18,
     name: 'Monad',

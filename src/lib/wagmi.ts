@@ -12,13 +12,13 @@ const monadChain = {
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.monad.xyz'],
+      http: ['https://testnet-rpc.monad.xyz'],
     },
   },
   blockExplorers: {
     default: { 
       name: 'Monad Explorer', 
-      url: 'https://explorer.monad.xyz',
+      url: 'https://testnet.monadexplorer.com',
       apiUrl: 'https://api.explorer.monad.xyz'
     },
   },

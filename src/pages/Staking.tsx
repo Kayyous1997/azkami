@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useWatchContractEvent } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Coins, Lock, Unlock, Trophy, Zap, Calendar, Users } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 
 // Mock NFT data - replace with actual contract calls
@@ -51,6 +50,20 @@ const STAKING_PERIODS = {
   monthly: { label: 'Monthly', multiplier: 2.5, lockDays: 30 },
 };
 
+const STAKING_ABI = [
+  {
+    "inputs": [{"name": "tokenIds", "type": "uint256[]"}, {"name": "stakingPeriod", "type": "uint8"}],
+    "name": "stakeMultipleNFTs", "outputs": [], "stateMutability": "nonpayable", "type": "function"
+  },
+  {
+    "inputs": [{"name": "tokenId", "type": "uint256"}],
+    "name": "unstakeNFT", "outputs": [], "stateMutability": "nonpayable", "type": "function"
+  },
+  {
+    "inputs": [], "name": "claimRewards", "outputs": [], "stateMutability": "nonpayable", "type": "function"
+  }
+] as const;
+
 const Staking = () => {
   const { address, isConnected } = useAccount();
   const [selectedNFTs, setSelectedNFTs] = useState<number[]>([]);
@@ -58,6 +71,11 @@ const Staking = () => {
   const [totalStaked, setTotalStaked] = useState(0);
   const [pendingRewards, setPendingRewards] = useState(0);
   const [stakingAPY, setStakingAPY] = useState(125); // 125% APY
+
+  // Real blockchain interactions
+  const { writeContract, isPending } = useWriteContract();
+  const { data: hash } = useWriteContract();
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
 
   // Calculate staking stats
   useEffect(() => {
@@ -87,24 +105,25 @@ const Staking = () => {
     }
 
     try {
-      const period = STAKING_PERIODS[stakingPeriod];
-      toast({
-        title: "Staking NFTs",
-        description: `Staking ${selectedNFTs.length} NFTs for ${period.label.toLowerCase()} on Monad blockchain...`,
+      const periodIndex = stakingPeriod === 'daily' ? 0 : stakingPeriod === 'weekly' ? 1 : 2;
+      const tokenIds = selectedNFTs.map(id => BigInt(id));
+
+      await writeContract({
+        address: STAKING_CONTRACT as `0x${string}`,
+        abi: STAKING_ABI,
+        functionName: 'stakeMultipleNFTs',
+        args: [tokenIds, periodIndex],
       });
-      
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       toast({
-        title: "NFTs Staked Successfully!",
-        description: `${selectedNFTs.length} NFTs are now earning $AZK rewards with ${period.multiplier}x multiplier.`,
+        title: "Transaction Submitted",
+        description: `Staking transaction submitted to Monad blockchain for ${selectedNFTs.length} NFTs.`,
       });
       setSelectedNFTs([]);
     } catch (error) {
       toast({
         title: "Staking Failed",
-        description: "Please try again later.",
+        description: "Transaction rejected or failed.",
         variant: "destructive",
       });
     }

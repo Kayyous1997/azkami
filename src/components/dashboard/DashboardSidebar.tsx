@@ -40,7 +40,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Staking", url: "/staking", icon: Lock },
+  { title: "Staking", url: "/staking", icon: Lock, comingSoon: true },
   { title: "Tasks", url: "/tasks", icon: CheckSquare },
   { title: "Rewards", url: "/rewards", icon: Trophy, comingSoon: true },
   { title: "Quests", url: "/quests", icon: Map, comingSoon: true },

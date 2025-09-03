@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useWatchContractEvent } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,29 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Coins, Lock, Unlock, Trophy, Zap, Calendar, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+
+// Define Monad chain configuration
+const monadChain = {
+  id: 10143,
+  name: 'Monad Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Monad',
+    symbol: 'MON',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://testnet-rpc.monad.xyz'],
+    },
+  },
+  blockExplorers: {
+    default: { 
+      name: 'Monad Explorer', 
+      url: 'https://testnet.monadexplorer.com',
+      apiUrl: 'https://api.explorer.monad.xyz'
+    },
+  },
+} as const;
 
 // Mock NFT data - replace with actual contract calls
 const mockNFTs = [
@@ -66,6 +89,7 @@ const STAKING_ABI = [
 
 const Staking = () => {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
   const [selectedNFTs, setSelectedNFTs] = useState<number[]>([]);
   const [stakingPeriod, setStakingPeriod] = useState<StakingPeriod>('weekly');
   const [totalStaked, setTotalStaked] = useState(0);
@@ -73,8 +97,7 @@ const Staking = () => {
   const [stakingAPY, setStakingAPY] = useState(125); // 125% APY
 
   // Real blockchain interactions
-  const { writeContract, isPending } = useWriteContract();
-  const { data: hash } = useWriteContract();
+  const { writeContract, isPending, data: hash } = useWriteContract();
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
 
   // Calculate staking stats
@@ -108,11 +131,14 @@ const Staking = () => {
       const periodIndex = stakingPeriod === 'daily' ? 0 : stakingPeriod === 'weekly' ? 1 : 2;
       const tokenIds = selectedNFTs.map(id => BigInt(id));
 
-      await writeContract({
+      writeContract({
         address: STAKING_CONTRACT as `0x${string}`,
         abi: STAKING_ABI,
         functionName: 'stakeMultipleNFTs',
         args: [tokenIds, periodIndex],
+        chainId: chainId,
+        account: address,
+        chain: monadChain,
       });
 
       toast({
